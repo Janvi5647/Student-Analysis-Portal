@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Performance Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .section { margin: 20px 0; }
+        .card { margin-bottom: 20px; }
+        .highlight { color: #007bff; }
+        .warning { color: #dc3545; }
+        .success { color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="btn btn-secondary mb-3">Back to Dashboard</a>
+        
+        <div class="row">
+            <!-- Basic Info Card -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Student Information</h3>
+                    </div>
+                    <div class="card-body">
+            <p><strong>Name:</strong> {{ data.student_info[student_col] }}</p>
+            <p><strong>Enrollment No:</strong> {{ data.student_info[enrollment_col] }}</p>
+            <p><strong>Roll No:</strong> {{ data.student_info[roll_col] }}</p>
+            <p><strong>Total Marks:</strong> {{ data.total_marks }}/400</p>
+            <p><strong>Overall Grade:</strong> {{ data.overall_grade }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overall Analysis Card -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h3 class="card-title mb-0">Overall Analysis</h3>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Class Rank:</strong> {{ analysis.overall.class_rank }} out of {{ total_students }}</p>
+                        <p><strong>Percentile:</strong> {{ "%.2f"|format(analysis.overall.percentile) }}%</p>
+                        <p><strong>Performance Trend:</strong> 
+                            <span class="{{ 'text-success' if analysis.overall.performance_trend == 'Improving' else 'text-danger' }}">
+                                {{ analysis.overall.performance_trend }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marks Table -->
+        <div class="card section">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Subject-wise Performance</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Test 1</th>
+                    <th>Test 2</th>
+                    <th>Test 3</th>
+                    <th>Test 4</th>
+                    <th>Total</th>
+                    <th>Average</th>
+                            <th>Improvement</th>
+                    <th>Grade</th>
+                </tr>
+                    </thead>
+                    <tbody>
+                {% for subject, performance in data.subject_performance.items() %}
+                <tr>
+                    <td>{{ subject }}</td>
+                            {% for test, marks in performance.test_marks.items()|sort %}
+                    <td>{{ marks }}</td>
+                    {% endfor %}
+                    <td>{{ "%.1f"|format(performance.total) }}</td>
+                    <td>{{ "%.1f"|format(performance.average) }}</td>
+                            <td class="{{ 'success' if performance.improvement > 0 else 'warning' if performance.improvement < 0 else '' }}">
+                                {{ "%.1f"|format(performance.improvement) }}
+                            </td>
+                    <td>{{ performance.grade }}</td>
+                </tr>
+                {% endfor %}
+                    </tbody>
+            </table>
+            </div>
+        </div>
+
+       
+
+       
+        
+
+        <!-- Detailed Analysis -->
+        <div class="card section">
+            <div class="card-header bg-success text-white">
+                <h3 class="card-title mb-0">Detailed Subject Analysis</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for subject, subject_analysis in analysis.subject_wise.items() %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">{{ subject }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <strong>Performance Level:</strong>
+                                        <span class="{{ 'text-success' if subject_analysis.performance_level == 'Above Average' 
+                                                      else 'text-danger' if subject_analysis.performance_level == 'Below Average'
+                                                      else 'text-warning' }}">
+                                            {{ subject_analysis.performance_level }}
+                                        </span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Trend:</strong>
+                                        <span class="{{ 'text-success' if subject_analysis.trend == 'Improving' else 'text-danger' }}">
+                                            {{ subject_analysis.trend }}
+                                        </span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Gap from Average:</strong>
+                                        <span class="{{ 'text-success' if subject_analysis.gap_from_avg > 0 else 'text-danger' }}">
+                                            {{ "%.2f"|format(subject_analysis.gap_from_avg) }} marks
+                                        </span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Subject Percentile:</strong>
+                                        {{ "%.2f"|format(subject_analysis.percentile) }}%
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Your Scores:</strong>
+                                        <div class="ms-3">
+                                            <div>
+                                                <strong>Highest:</strong>
+                                                <span class="text-success">
+                                                    {{ subject_analysis.max_marks }} ({{ subject_analysis.max_test }})
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <strong>Lowest:</strong>
+                                                <span class="text-danger">
+                                                    {{ subject_analysis.min_marks }} ({{ subject_analysis.min_test }})
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Graphs -->
+        <div class="card section">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Performance Graphs</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Subject-wise Performance Comparison</h5>
+                            </div>
+                            <div class="card-body">
+                                <img src="{{ url_for('static', filename=graphs.performance_graph) }}" 
+                                     class="img-fluid" alt="Performance Comparison">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Progress Across Tests</h5>
+                            </div>
+                            <div class="card-body">
+                                <img src="{{ url_for('static', filename=graphs.progress_graph) }}" 
+                                     class="img-fluid" alt="Progress Graph">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        {% if analysis.recommendations %}
+        <div class="card section">
+            <div class="card-header bg-warning">
+                <h3 class="card-title mb-0">Recommendations</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for recommendation in analysis.recommendations %}
+                    <li class="list-group-item">{{ recommendation }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <a href="{{ url_for('download', enrollment_no=data.student_info[enrollment_col]|string) }}" 
+           class="btn btn-primary mt-3">Download Detailed Marksheet</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

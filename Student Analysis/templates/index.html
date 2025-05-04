@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .accordion-button:not(.collapsed) {
+            background-color: #e7f1ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Student Performance Analysis Dashboard</h1>
+
+        <!-- Search Box -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form action="/student" method="GET" class="d-flex">
+                    <input type="text" name="enrollment" class="form-control me-2" placeholder="Enter Enrollment Number">
+                    <button type="submit" class="btn btn-primary">Search Student</button>
+            </form>
+            </div>
+        </div>
+
+        <!-- Accordion -->
+        <div class="accordion" id="analysisAccordion">
+            <!-- Overall Performance -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="performanceHeader">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#performanceContent">
+                        Overall Performance Highlights
+                    </button>
+                </h2>
+                <div id="performanceContent" class="accordion-collapse collapse show" data-bs-parent="#analysisAccordion">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Subject Analysis</h5>
+                                <ul class="list-group">
+                                    <li class="list-group-item">Strongest Subject: <span class="text-success">{{ strongest }}</span></li>
+                                    <li class="list-group-item">Weakest Subject: <span class="text-danger">{{ weakest }}</span></li>
+                                    <li class="list-group-item">Overall Topper: <span class="text-primary">{{ overall_topper }}</span></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Student Performance</h5>
+                                <ul class="list-group">
+                                    <li class="list-group-item">Most Improved: <span class="text-success">{{ most_improved }}</span></li>
+                                    <li class="list-group-item">Least Improved: <span class="text-danger">{{ least_improved }}</span></li>
+                                    <li class="list-group-item">Most Consistent: <span class="text-primary">{{ most_consistent }}</span></li>
+                                    <li class="list-group-item">Most Deteriorated: <span class="text-danger">{{ most_deteriorated }}</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+            <!-- Subject-wise Toppers -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="toppersHeader">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#toppersContent">
+                        Subject-wise Toppers
+                    </button>
+                </h2>
+                <div id="toppersContent" class="accordion-collapse collapse" data-bs-parent="#analysisAccordion">
+                    <div class="accordion-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Test 1</th>
+                    <th>Test 2</th>
+                    <th>Test 3</th>
+                    <th>Test 4</th>
+                </tr>
+                                </thead>
+                                <tbody>
+                {% for subject in subjects %}
+                <tr>
+                    <td>{{ subject }}</td>
+                    {% for test in subject_tests[subject] %}
+                    <td>
+                        {{ highest_per_test[subject][test]['name'] }}<br>
+                        <small>({{ highest_per_test[subject][test]['marks'] }} marks)</small>
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                                </tbody>
+            </table>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+            <!-- Top 10 Students -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="top10Header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#top10Content">
+                        Top 10 Students
+                    </button>
+                </h2>
+                <div id="top10Content" class="accordion-collapse collapse" data-bs-parent="#analysisAccordion">
+                    <div class="accordion-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Student Name</th>
+                    <th>Roll No</th>
+                    <th>Enrollment No</th>
+                    <th>Total Marks</th>
+                </tr>
+                                </thead>
+                                <tbody>
+                {% for student in top_students %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ student[student_col] }}</td>
+                    <td>{{ student[roll_col] }}</td>
+                    <td>{{ student[enrollment_col] }}</td>
+                    <td>{{ student['Total Marks'] }}</td>
+                </tr>
+                {% endfor %}
+                                </tbody>
+            </table>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+            <!-- Subject-wise Analysis -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="analysisHeader">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#analysisContent">
+                        Subject-wise Test Analysis
+                    </button>
+                </h2>
+                <div id="analysisContent" class="accordion-collapse collapse" data-bs-parent="#analysisAccordion">
+                    <div class="accordion-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Test 1</th>
+                    <th>Test 2</th>
+                    <th>Test 3</th>
+                    <th>Test 4</th>
+                    <th>Overall Average</th>
+                </tr>
+                                </thead>
+                                <tbody>
+                {% for subject in subjects %}
+                <tr>
+                    <td><strong>{{ subject }}</strong></td>
+                    {% for test in subject_tests[subject] %}
+                    <td>
+                        Avg: {{ "%.1f"|format(subject_analysis[subject]['test_averages'][test]) }}<br>
+                                            High: {{ "%.1f"|format(subject_analysis[subject]['test_highest'][loop.index0]) }}<br>
+                                            Low: {{ "%.1f"|format(subject_analysis[subject]['test_lowest'][loop.index0]) }}
+                    </td>
+                    {% endfor %}
+                    <td>{{ "%.1f"|format(subject_analysis[subject]['average']) }}</td>
+                </tr>
+                {% endfor %}
+                                </tbody>
+            </table>
+                        </div>
+
+                        <!-- Test Distribution Histograms -->
+                        <h4 class="mt-4 mb-3">Test-wise Marks Distribution</h4>
+                        <div class="row">
+                            {% for subject in subjects %}
+                            <div class="col-12 mb-4">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0">{{ subject }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <img src="{{ url_for('static', filename=subject.lower() + '_test_analysis.png') }}" 
+                                             class="img-fluid" 
+                                             alt="{{ subject }} Test Analysis">
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+            <!-- Subject-wise Pass/Fail Analysis -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="subjectResultHeader">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#subjectResultContent">
+                        Subject-wise Pass/Fail Analysis
+                    </button>
+                </h2>
+                <div id="subjectResultContent" class="accordion-collapse collapse" data-bs-parent="#analysisAccordion">
+                    <div class="accordion-body">
+                        {% for subject, stats in subject_statistics.items() %}
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">{{ subject }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('download_subject_result', subject=subject, status='pass') }}" 
+                                               class="btn btn-success btn-sm">
+                                                Download Passing List
+                                            </a>
+                                            <a href="{{ url_for('download_subject_result', subject=subject, status='fail') }}" 
+                                               class="btn btn-danger btn-sm">
+                                                Download Failing List
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card border-success">
+                                            <div class="card-header bg-success text-white">
+                                                Passing Students (≥ 35 Marks)
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Name</th>
+                                                                <th>Total Marks</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for student in stats.passing %}
+                                                            <tr>
+                                                                <td>{{ student[student_col] }}</td>
+                                                                <td>{{ student.Subject_Total }}</td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer">
+                                                Total Passing: {{ stats.pass_count }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="card border-danger">
+                                            <div class="card-header bg-danger text-white">
+                                                Failing Students (< 35 Marks)
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Name</th>
+                                                                <th>Total Marks</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for student in stats.failing %}
+                                                            <tr>
+                                                                <td>{{ student[student_col] }}</td>
+                                                                <td>{{ student.Subject_Total }}</td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer">
+                                                Total Failing: {{ stats.fail_count }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+        </div>
+        
+            <!-- Division-wise Analysis -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="divisionHeader">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#divisionContent">
+                        Division-wise Student Lists
+                    </button>
+                </h2>
+                <div id="divisionContent" class="accordion-collapse collapse" data-bs-parent="#analysisAccordion">
+                    <div class="accordion-body">
+                        <div class="row">
+                            {% for division, students in division_statistics.items() %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">Division {{ division }}</h5>
+                                        <a href="{{ url_for('download_division_list', division=division) }}" 
+                                           class="btn btn-light btn-sm">
+                                            Download List
+                                        </a>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                            <table class="table table-sm table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>New Roll No</th>
+                                                        <th>Name</th>
+                                                        <th>Enrollment No</th>
+                                                        <th>Total Marks</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for student in students %}
+                                                    <tr>
+                                                        {% if division == 'A' %}
+                                                            <td>{{ loop.index }}</td>
+                                                        {% elif division == 'B' %}
+                                                            <td>{{ loop.index + 30 }}</td>
+                                                        {% elif division == 'C' %}
+                                                            <td>{{ loop.index + 60 }}</td>
+                                                        {% else %}
+                                                            <td>{{ loop.index + 90 }}</td>
+                                                        {% endif %}
+                                                        <td>{{ student[student_col] }}</td>
+                                                        <td>{{ student[enrollment_col] }}</td>
+                                                        <td>{{ student['Total Marks'] }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        Total Students: {{ students|length }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+        </div>
+        
+            <!-- Performance Graphs -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="graphsHeader">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#graphsContent">
+                        Performance Graphs
+                    </button>
+                </h2>
+                <div id="graphsContent" class="accordion-collapse collapse" data-bs-parent="#analysisAccordion">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-header">Subject-wise Average Marks</div>
+                                    <div class="card-body">
+                                        <img src="{{ url_for('static', filename='subject_avg.png') }}" class="img-fluid" alt="Subject Average">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-header">Test-wise Performance Trend</div>
+                                    <div class="card-body">
+                                        <img src="{{ url_for('static', filename='test_trend.png') }}" class="img-fluid" alt="Test Trend">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-header">Distribution of Total Marks</div>
+                                    <div class="card-body">
+                                        <img src="{{ url_for('static', filename='marks_distribution.png') }}" class="img-fluid" alt="Marks Distribution">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
